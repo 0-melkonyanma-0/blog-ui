@@ -1,0 +1,14 @@
+{
+  "auth": {
+    "register": "Регистрация",
+    "login": "Логин",
+    "enter": "Вход",
+    "fields": {
+      "name": "Имя",
+      "username": "Никнейм",
+      "email": "E-mail",
+      "password": "Пароль",
+      "password_confirmation": "Подверждение пароля"
+    }
+  }
+}

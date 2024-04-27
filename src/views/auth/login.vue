@@ -1,6 +1,5 @@
 <script>
 import Form from "vform";
-import {API_PATH} from "../../plugins/consts.js";
 import {useAuthStore} from "../../stores/AuthStore.js";
 
 export default {
@@ -51,7 +50,7 @@ export default {
           </v-text-field>
         </v-card-text>
         <v-card-actions class="mx-3">
-          <v-btn type="submit" color="green" variant="outlined">
+          <v-btn :loading="auth.loading" type="submit" color="green" variant="outlined">
             {{ $t('auth.login') }}
           </v-btn>
           <v-btn :to="{name: 'auth.register'}" variant="outlined">
@@ -62,7 +61,3 @@ export default {
     </v-form>
   </div>
 </template>
-
-<style scoped>
-
-</style>

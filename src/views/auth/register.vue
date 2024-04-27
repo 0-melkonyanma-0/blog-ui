@@ -1,10 +1,11 @@
 <script>
 import Form from "vform";
-import {API_PATH} from "../../plugins/consts.js";
+import {useAuthStore} from "../../stores/AuthStore.js";
 
 export default {
   data: function () {
     return {
+      auth: useAuthStore(),
       user: new Form({
         email: '',
         name: '',
@@ -16,7 +17,7 @@ export default {
   },
   methods: {
     register() {
-      this.user.post(`${API_PATH}/auth/register`)
+      this.auth.register(this.user)
     }
   }
 }
@@ -78,7 +79,7 @@ export default {
           </v-text-field>
         </v-card-text>
         <v-card-actions class="mx-3">
-          <v-btn type="submit" color="primary" variant="outlined">
+          <v-btn :loading="auth.loading" type="submit" color="primary" variant="outlined">
             {{ $t('auth.register') }}
           </v-btn>
           <v-btn :to="{name: 'auth.login'}" variant="outlined">

@@ -1,4 +1,10 @@
 {
+  "app-title": "My Blog",
+  "profile": {
+    "title": "Настройки",
+    "profile": "Профиль",
+    "logout": "Выйти"
+  },
   "auth": {
     "register": "Регистрация",
     "login": "Логин",

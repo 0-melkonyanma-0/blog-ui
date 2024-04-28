@@ -122,15 +122,6 @@
             mdi-code-block-tags
           </v-icon>
         </v-btn>
-
-<!--        <v-btn-->
-<!--            v-if="actionName === 'horizontalRule'"-->
-<!--            class="menubar__button"-->
-<!--            @click="editor.chain().focus().setHorizontalRule().run()"-->
-<!--        >-->
-<!--&lt;!&ndash;          <icon name="hr" />&ndash;&gt;-->
-<!--        </v-btn>-->
-
         <v-btn
             variant="flat"
             v-if="actionName === 'undo'"
@@ -151,7 +142,7 @@
       </span>
     </div>
 
-    <editor-content style="border: solid 2px black" class="editor__content" :editor="editor"/>
+    <editor-content class="editor__content" :editor="editor"/>
   </div>
 </template>
 
@@ -166,11 +157,6 @@ export default {
     EditorContent
   },
   props: {
-    initialContent: {
-      type: String,
-      required: true,
-      default: '<em>editable text</em>',
-    },
     activeButtons: {
       type: Array,
       validator: function (list) {
@@ -213,7 +199,7 @@ export default {
   },
   created() {
     this.editor = new Editor({
-      content: this.initialContent,
+      content: '',
       extensions: [StarterKit, Underline],
     });
 
@@ -232,5 +218,11 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
+.editor__content {
+  border: solid 1px #a99292;
+  height: 125px;
+  overflow-y: scroll;
+  border-radius: 4px;
+}
 </style>

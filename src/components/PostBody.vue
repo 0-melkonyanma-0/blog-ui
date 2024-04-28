@@ -10,7 +10,11 @@ const props = defineProps(['post', 'show'])
       </span>
     </v-row>
     <v-row class="my-1 mx-1 account">
-      <span class="pa-1">{{ props.post.author.name }}@{{ props.post.author.username }}</span>
+      <span class="pa-1">{{ props.post.author.name }}@<v-chip
+          @click="$router.push({name: 'users.show', params: {username: props.post.author.username}})">
+          {{ props.post.author.username }}
+        </v-chip>
+      </span>
     </v-row>
   </v-card-title>
   <v-card-text class="mx-2">

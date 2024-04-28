@@ -1,6 +1,5 @@
 import {importer} from "../../plugins/importer.js";
 import Cookies from "js-cookie";
-import router from "../index.js";
 
 export default [
     {

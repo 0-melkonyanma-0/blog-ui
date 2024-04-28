@@ -21,7 +21,7 @@ export const useAuthStore = defineStore('authStore', {
             })
 
             this.access_token = data.access_token
-            Cookies.set('access_token', data.access_token, {expires: data.expiers_in})
+            Cookies.set('access_token', data.access_token)
 
             await this.getCurrentUser()
             this.loading = false

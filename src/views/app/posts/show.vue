@@ -5,6 +5,7 @@ import PostBody from "../../../components/PostBody.vue";
 import Form from "vform";
 import {EditorContent} from "@tiptap/vue-3";
 import Editor from "../../../components/Editor.vue";
+import {useAuthStore} from "../../../stores/AuthStore.js";
 
 export default {
   components: {Editor, EditorContent, PostBody},
@@ -18,9 +19,13 @@ export default {
     }),
   }),
   methods: {
+    useAuthStore,
     async getPost() {
       this.loading = true
       const {data} = await axios.get(`${API_PATH}/posts/${this.$route.params.id}`)
+      if (data.status === 204) {
+        this.$router.push({name: 'posts.index'})
+      }
       this.post = data.data
       this.loading = false
     },
@@ -28,6 +33,19 @@ export default {
       await this.comment.post(`${API_PATH}/posts/${this.$route.params.id}/comments`)
       this.comment.body = ''
       await this.getPost()
+    },
+    async deleteComment(id) {
+      await this.comment.delete(`${API_PATH}/posts/comments/${id}`)
+      this.comment.body = ''
+      await this.getPost()
+    },
+    async archivePost() {
+      await axios.patch(`${API_PATH}/posts/${this.$route.params.id}/archive`)
+      window.location.reload()
+    },
+    async unArchivePost() {
+      await axios.patch(`${API_PATH}/posts/${this.$route.params.id}/un-archive`)
+      window.location.reload()
     },
     setComment(comment) {
       this.comment.body = comment
@@ -41,67 +59,106 @@ export default {
 </script>
 
 <template>
-  <div>
-    <v-card style="border: solid 2px gray; border-radius: 8px">
-      <v-card-text v-if="loading">
-        <v-row justify="center" class="pa-16">
-          <v-progress-circular indeterminate>
-          </v-progress-circular>
-        </v-row>
-      </v-card-text>
-      <post-body v-else :post="post" :show="true"></post-body>
-    </v-card>
-    <v-card class="mt-4" style="border: solid 2px gray;border-radius: 8px">
-      <v-card-text>
-        <v-row class="pa-0">
-          <v-col cols="10">
-            <editor
-                class="mx-4"
-                :active-buttons="['bold', 'italic', 'strike', 'underline']"
-                :initial-content="comment.body"
-                @update="setComment"
-            />
-          </v-col>
-          <v-col cols="2" class="pa-0 mt-4">
-            <v-btn @click="sendComment" height="80">
-              <v-icon>
-                mdi-arrow-left
-              </v-icon>
+  <v-container class="mx-auto d-flex align-center justify-center">
+    <v-responsive max-width="900">
+      <v-card style="border: solid 2px gray; border-radius: 8px">
+        <v-card-text v-if="loading">
+          <v-row justify="center" class="pa-16">
+            <v-progress-circular indeterminate>
+            </v-progress-circular>
+          </v-row>
+        </v-card-text>
+        <post-body v-else :post="post" :show="true"></post-body>
+        <v-btn
+            @click="archivePost"
+            v-if="
+              !post.archived_at &&
+              post.author?.username === useAuthStore().user.username
+            "
+            color="green"
+            class="ml-4 mb-3"
+        >
+          <v-icon>
+            mdi-archive
+          </v-icon>
+        </v-btn>
+        <v-btn
+            @click="unArchivePost"
+            v-else-if="post.archived_at"
+            color="green"
+            class="ml-4 mb-3"
+        >
+          <v-icon>
+            mdi-package-up
+          </v-icon>
+        </v-btn>
+      </v-card>
+      <v-card class="mt-4" style="border: solid 2px gray;border-radius: 8px">
+        <v-card-text>
+          <v-row class="pa-0">
+            <v-col>
+              <editor
+                  class="mx-4"
+                  :active-buttons="['bold', 'italic', 'strike', 'underline']"
+                  @update="setComment"
+              />
+            </v-col>
+          </v-row>
+          <v-row class="ml-4 mb-4">
+            <v-btn @click="sendComment" color="green" class="mt-4">
+              {{ $t('post.send_comment') }}
             </v-btn>
-          </v-col>
-        </v-row>
-      </v-card-text>
-    </v-card>
+          </v-row>
+        </v-card-text>
+      </v-card>
 
-    <v-card v-show="post.comments" variant="flat" class="mt-4">
-      <v-card-text>
-        <v-card style="border: solid 2px grey; border-radius: 8px" class="mb-4"
-                v-for="(comment, index) in post.comments" :key="index">
-          <v-card-title>
-            <span style="font-size: 18px">
-              <span style="color: #9AC11C">
-                {{ comment.author.name }}
+      <v-card v-show="post.comments" variant="flat" class="mt-4">
+        <v-card-text>
+          <v-card
+              style="border: solid 2px grey; border-radius: 8px"
+              class="mb-4"
+              v-for="(comment, index) in post.comments"
+              :key="index"
+          >
+            <v-card-title class="mt-4 ml-2">
+              <v-row>
+                <v-col cols="8">
+                  <span style="font-size: 18px">
+                <span style="color: #9AC11C">
+                  {{ comment.author.name }}
+                </span>
+                <span class="ml-1" style="color:#9ebe37">@</span>
+                <span
+                    style="color: #839D2D"
+                    class="ml-1"
+                    @click="$router.push({name: 'users.show', params: {username: comment.author.username }})"
+                >
+                  <v-chip>
+                    {{ comment.author.username }}
+                  </v-chip>
+                </span>
               </span>
-              <span class="ml-1" style="color:#9ebe37">@</span>
-              <span
-                  style="color: #839D2D"
-                  class="ml-1"
-                  @click="$router.push({name: 'users.show', params: {username: comment.author.username }})"
-              >
-                <v-chip>
-                  {{ comment.author.username }}
-                </v-chip>
-              </span>
-            </span>
-          </v-card-title>
-          <v-card-text>
+                </v-col>
+                <v-col v-if="comment.author.username === useAuthStore().user.username">
+                  <v-row justify="end" class="mr-8 pa-1">
+                    <v-btn color="red" @click="deleteComment(comment.id)" icon>
+                      <v-icon>
+                        mdi-delete
+                      </v-icon>
+                    </v-btn>
+                  </v-row>
+                </v-col>
+              </v-row>
+            </v-card-title>
+            <v-card-text>
             <span class="pa-2" v-html="comment.body" style="font-size: 16px;">
             </span>
-          </v-card-text>
-        </v-card>
-      </v-card-text>
-    </v-card>
-  </div>
+            </v-card-text>
+          </v-card>
+        </v-card-text>
+      </v-card>
+    </v-responsive>
+  </v-container>
 </template>
 
 <style scoped>

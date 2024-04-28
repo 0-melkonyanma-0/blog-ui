@@ -5,6 +5,14 @@
     "profile": "Профиль",
     "logout": "Выйти"
   },
+  "menu": {
+    "posts": "Все посты",
+    "categories": "Категории"
+  },
+  "post": {
+    "send_comment": "Комментировать",
+    "here_no_posts": "У пользователя постов нет"
+  },
   "auth": {
     "register": "Регистрация",
     "login": "Логин",

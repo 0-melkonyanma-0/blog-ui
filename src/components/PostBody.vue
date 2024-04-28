@@ -10,11 +10,12 @@ const props = defineProps(['post', 'show'])
       </span>
     </v-row>
     <v-row class="my-1 mx-1 account">
-      <span class="pa-1">{{ props.post.author.name }}@<v-chip
-          @click="$router.push({name: 'users.show', params: {username: props.post.author.username}})">
-          {{ props.post.author.username }}
-        </v-chip>
-      </span>
+      <span v-if="show" class="pa-1">{{ props.post.author.name }}</span>
+      <v-chip
+          @click="$router.push({name: 'users.show', params: {username: props.post.author.username}})"
+      >
+        {{ props.post.author.username }}
+      </v-chip>
     </v-row>
   </v-card-title>
   <v-card-text class="mx-2">
@@ -24,9 +25,20 @@ const props = defineProps(['post', 'show'])
   </v-card-text>
   <v-card-text v-if="!show">
     <v-row justify="end" class="pa-2">
-      <span class="me-4 view-colorize">
-        <v-icon>mdi-eye</v-icon> {{ props.post.views }}
-      </span>
+      <v-col class="pa-0 ml-2" cols="9">
+        <v-btn
+            color="primary"
+            @click="$router.push({name: 'posts.show', params: {id: post.id}})"
+            block
+        >
+          {{ $t('post.read') }}
+        </v-btn>
+      </v-col>
+      <v-col class="pa-0" align-self="center" align="end">
+        <span class="me-4 view-colorize">
+          <v-icon>mdi-eye</v-icon> {{ props.post.views }}
+        </span>
+      </v-col>
     </v-row>
   </v-card-text>
 </template>

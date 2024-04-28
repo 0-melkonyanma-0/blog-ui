@@ -1,9 +1,9 @@
 <template>
   <v-container class="mx-auto d-flex align-center justify-center">
-    <v-card variant="flat" color="#B39CD0">
+    <v-card variant="flat" class="posts-background__color">
       <v-responsive max-width="1500">
         <v-card-text>
-          <v-row v-if="posts" v-for="(postRow, index) in posts" :key="`post-row-${index}`" justify="center">
+          <v-row v-if="posts.length" v-for="(postRow, index) in posts" :key="`post-row-${index}`" justify="center">
             <v-col
                 xs="12"
                 lg="4"
@@ -15,25 +15,35 @@
             >
               <v-card
                   style="border: solid 2px gray; border-radius: 8px"
-                  @click="$router.push({name: 'posts.show', params: {id: post.id}})"
                   :disabled="loading"
               >
-                <v-card-text style="min-height: 125px; max-height: 150px; max-width: 400px" v-if="loading">
-                  <v-row justify="center">
-                    <v-col align-self="center" align="center">
-                      <v-progress-circular class="mt-8" v-model="loading" indeterminate></v-progress-circular>
-                    </v-col>
-                  </v-row>
-                </v-card-text>
+                <v-skeleton-loader
+                    v-if="loading"
+                    :loading="loading"
+                    class="mx-auto"
+                    elevation="2"
+                    width="300"
+                    max-width="350"
+                    height="150"
+                    type="article"
+                    boilerplate
+                ></v-skeleton-loader>
                 <post-body v-else :post="post">
                 </post-body>
               </v-card>
             </v-col>
           </v-row>
-          <v-row v-else>
+          <v-row v-else-if="loading">
             <v-row justify="center">
               <v-col align-self="center" align="center">
                 <v-progress-circular class="mt-8" v-model="loading" indeterminate></v-progress-circular>
+              </v-col>
+            </v-row>
+          </v-row>
+          <v-row v-else>
+            <v-row justify="center" class="mt-10 px-10">
+              <v-col align-self="center" align="center">
+                {{ $t('post.no_content_on_web_site') }}
               </v-col>
             </v-row>
           </v-row>
@@ -64,7 +74,7 @@ import PostBody from "../../../components/PostBody.vue";
 export default {
   components: {PostBody},
   data: () => ({
-    posts: null,
+    posts: [],
     total: null,
     loading: true,
     current_page: 1,
@@ -86,5 +96,10 @@ export default {
 </script>
 
 <style>
-
+.posts-background__color {
+  background: rgba( 206, 214, 237, 0.6 );
+  backdrop-filter: blur( 14.5px );
+  -webkit-backdrop-filter: blur( 14.5px );
+  border-radius: 10px;
+}
 </style>

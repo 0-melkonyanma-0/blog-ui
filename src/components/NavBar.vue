@@ -19,7 +19,7 @@ function setDrawer(drawer) {
 </script>
 
 <template>
-  <v-app-bar>
+  <v-app-bar color="#EBC595">
     <v-container class="mx-auto d-flex align-center justify-center">
       <v-app-bar-nav-icon variant="text" @click="setDrawer(!props.drawer)">
       </v-app-bar-nav-icon>
@@ -33,7 +33,7 @@ function setDrawer(drawer) {
       <v-menu v-if="auth.access_token && auth.user">
         <template v-slot:activator="{ props }">
           <v-btn
-              color="primary"
+              color="#1E4065"
               v-bind="props"
               variant="outlined"
               class="mr-4"

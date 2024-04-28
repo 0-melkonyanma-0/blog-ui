@@ -39,6 +39,10 @@ export default {
       this.comment.body = ''
       await this.getPost()
     },
+    async deletePost() {
+      await axios.delete(`${API_PATH}/posts/${this.$route.params.id}`)
+      this.$router.push({name: 'posts.index'})
+    },
     async archivePost() {
       await axios.patch(`${API_PATH}/posts/${this.$route.params.id}/archive`)
       window.location.reload()
@@ -60,8 +64,47 @@ export default {
 
 <template>
   <v-container class="mx-auto d-flex align-center justify-center">
-    <v-responsive max-width="900">
+    <v-col xs="12" md="12" lg="8" xl="7" xxl="6">
       <v-card style="border: solid 2px gray; border-radius: 8px">
+        <v-row class="my-4 ml-4" v-if="post.author?.username === useAuthStore().user.username">
+          <v-btn
+              @click="archivePost"
+              v-if="
+              !post.archived_at
+            "
+              color="green"
+          >
+            <v-icon>
+              mdi-archive
+            </v-icon>
+          </v-btn>
+          <v-btn
+              @click="unArchivePost"
+              v-else-if="post.archived_at"
+              color="green"
+          >
+            <v-icon>
+              mdi-package-up
+            </v-icon>
+          </v-btn>
+          <v-btn
+              class="ml-4"
+              color="red"
+              @click="deletePost"
+          >
+            <v-icon>
+              mdi-delete
+            </v-icon>
+          </v-btn>
+          <v-btn
+              class="ml-4"
+              color="primary"
+          >
+            <v-icon>
+              mdi-pencil
+            </v-icon>
+          </v-btn>
+        </v-row>
         <v-card-text v-if="loading">
           <v-row justify="center" class="pa-16">
             <v-progress-circular indeterminate>
@@ -69,29 +112,6 @@ export default {
           </v-row>
         </v-card-text>
         <post-body v-else :post="post" :show="true"></post-body>
-        <v-btn
-            @click="archivePost"
-            v-if="
-              !post.archived_at &&
-              post.author?.username === useAuthStore().user.username
-            "
-            color="green"
-            class="ml-4 mb-3"
-        >
-          <v-icon>
-            mdi-archive
-          </v-icon>
-        </v-btn>
-        <v-btn
-            @click="unArchivePost"
-            v-else-if="post.archived_at"
-            color="green"
-            class="ml-4 mb-3"
-        >
-          <v-icon>
-            mdi-package-up
-          </v-icon>
-        </v-btn>
       </v-card>
       <v-card class="mt-4" style="border: solid 2px gray;border-radius: 8px">
         <v-card-text>
@@ -157,7 +177,7 @@ export default {
           </v-card>
         </v-card-text>
       </v-card>
-    </v-responsive>
+    </v-col>
   </v-container>
 </template>
 

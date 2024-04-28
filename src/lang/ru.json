@@ -11,7 +11,12 @@
   },
   "post": {
     "send_comment": "Комментировать",
-    "here_no_posts": "У пользователя постов нет"
+    "here_no_posts": "Публикаций нет",
+    "all_posts": "Все посты",
+    "archived_posts": "Архивные посты",
+    "read": "Читать",
+    "no_content_on_web_site": "Будь первым кто напишет пост!",
+    "create": "Создать пост"
   },
   "auth": {
     "register": "Регистрация",

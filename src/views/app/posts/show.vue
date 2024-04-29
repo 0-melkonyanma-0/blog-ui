@@ -6,6 +6,9 @@ import Form from "vform";
 import {EditorContent} from "@tiptap/vue-3";
 import Editor from "../../../components/Editor.vue";
 import {useAuthStore} from "../../../stores/AuthStore.js";
+import {useToast} from "vue-toastification";
+
+const toast = useToast()
 
 export default {
   components: {Editor, EditorContent, PostBody},
@@ -31,16 +34,25 @@ export default {
     },
     async sendComment() {
       await this.comment.post(`${API_PATH}/posts/${this.$route.params.id}/comments`)
+          .catch((err) => {
+            toast.error(err.response.data.message)
+          })
       this.comment.body = ''
       await this.getPost()
     },
     async deleteComment(id) {
       await this.comment.delete(`${API_PATH}/posts/comments/${id}`)
+          .catch((err) => {
+            toast.error(err.response.data.message)
+          })
       this.comment.body = ''
       await this.getPost()
     },
     async deletePost() {
       await axios.delete(`${API_PATH}/posts/${this.$route.params.id}`)
+          .catch((err) => {
+            toast.error(err.response.data.message)
+          })
       this.$router.push({name: 'posts.index'})
     },
     async archivePost() {
@@ -99,6 +111,7 @@ export default {
           <v-btn
               class="ml-4"
               color="primary"
+              @click="$router.push({name: 'posts.edit', params: {id: post.id}})"
           >
             <v-icon>
               mdi-pencil

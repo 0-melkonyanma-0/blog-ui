@@ -1,5 +1,5 @@
 <template>
-  <post-form></post-form>
+  <post-form :model="$route.params.id"></post-form>
 </template>
 
 <script>

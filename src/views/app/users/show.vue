@@ -40,10 +40,10 @@
   <v-row class="my-4" justify="center">
     <div class="tabs__color">
       <v-tabs hide-slider selected-class="tabs-selected__color">
-        <v-tab @click="getUserPosts(1)">
+        <v-tab :disabled="loading" @click="getUserPosts(1)">
           {{ $t('post.all_posts') }}
         </v-tab>
-        <v-tab @click="getArchivedUserPosts(1)" v-if="useAuthStore().user.username === $route.params.username">
+        <v-tab :disabled="loading" @click="getArchivedUserPosts(1)" v-if="useAuthStore().user.username === $route.params.username">
           {{ $t('post.archived_posts') }}
         </v-tab>
       </v-tabs>
@@ -80,13 +80,17 @@
                       @click="$router.push({name: 'posts.show', params: {id: post.id}})"
                       :disabled="loading"
                   >
-                    <v-card-text style="min-height: 125px; max-height: 150px; max-width: 400px" v-if="loading">
-                      <v-row justify="center">
-                        <v-col align-self="center" align="center">
-                          <v-progress-circular class="mt-8" v-model="loading" indeterminate></v-progress-circular>
-                        </v-col>
-                      </v-row>
-                    </v-card-text>
+                    <v-skeleton-loader
+                        v-if="loading"
+                        :loading="loading"
+                        class="mx-auto"
+                        elevation="2"
+                        width="300"
+                        max-width="350"
+                        height="150"
+                        type="article"
+                        boilerplate
+                    ></v-skeleton-loader>
                     <post-body v-else :post="post">
                     </post-body>
                   </v-card>

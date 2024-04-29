@@ -45,7 +45,7 @@ function setDrawer(drawer) {
         </template>
         <v-list class="mt-4">
           <v-list-item
-              @click="$router.push({name: 'users.edit', params: {username: auth.user.username}})"
+              @click="$router.push({name: 'users.settings', params: {username: auth.user.username}})"
               prepend-icon="mdi-cog-outline"
           >
             <v-list-item-title>

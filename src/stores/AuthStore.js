@@ -4,21 +4,25 @@ import {API_PATH} from "../plugins/consts.js";
 import Cookies from 'js-cookie'
 import intersection from "lodash/intersection.js";
 import router from "../router/index.js";
+import {useToast} from "vue-toastification";
 
+const toast = useToast()
 
 export const useAuthStore = defineStore('authStore', {
     state: () => ({
         access_token: Cookies.get('access_token'),
-        user: Cookies.get('current_user') !== undefined ? JSON.parse(Cookies.get('current_user')) : null,
+        user: Cookies.get('current_user') !== undefined ? JSON.parse(Cookies.get('current_user')) : Cookies.remove('access_token'),
         returnUrl: null,
         loading: false,
     }),
     actions: {
         async register(credentials) {
             this.loading = true
-            const {data} = await axios.post(`${API_PATH}/auth/register`, credentials).catch(() => {
-                this.loading = false
-            })
+            const {data} = await axios.post(`${API_PATH}/auth/register`, credentials)
+                .catch((err) => {
+                    toast.error(JSON.stringify(err.response.data))
+                    this.loading = false
+                })
 
             this.access_token = data.access_token
             Cookies.set('access_token', data.access_token)
@@ -32,7 +36,8 @@ export const useAuthStore = defineStore('authStore', {
             this.loading = true
             const {data} = await axios.post(`${API_PATH}/auth/login`, {
                 email, password
-            }).catch(() => {
+            }).catch((err) => {
+                toast.error(JSON.stringify(err.response.data))
                 this.loading = false
             })
 

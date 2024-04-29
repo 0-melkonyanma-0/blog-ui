@@ -33,16 +33,26 @@ export default {
       this.loading = false
     },
     async sendComment() {
+      this.loading = true
       await this.comment.post(`${API_PATH}/posts/${this.$route.params.id}/comments`)
+          .then(() => {
+            this.loading = false
+          })
           .catch((err) => {
+            this.loading = false
             toast.error(err.response.data.message)
           })
       this.comment.body = ''
       await this.getPost()
     },
     async deleteComment(id) {
+      this.loading = true
       await this.comment.delete(`${API_PATH}/posts/comments/${id}`)
+          .then(() => {
+            this.loading = false
+          })
           .catch((err) => {
+            this.loading = false
             toast.error(err.response.data.message)
           })
       this.comment.body = ''
@@ -131,14 +141,15 @@ export default {
           <v-row class="pa-0">
             <v-col>
               <editor
-                  class="mx-4"
+                  class="mx-4 mt-4"
                   :active-buttons="['bold', 'italic', 'strike', 'underline']"
                   @update="setComment"
+                  :initial-value="comment.body"
               />
             </v-col>
           </v-row>
           <v-row class="ml-4 mb-4">
-            <v-btn @click="sendComment" color="green" class="mt-4">
+            <v-btn :loading="loading" @click="sendComment" color="green" class="mt-4">
               {{ $t('post.send_comment') }}
             </v-btn>
           </v-row>
@@ -174,7 +185,7 @@ export default {
                 </v-col>
                 <v-col v-if="comment.author.username === useAuthStore().user.username">
                   <v-row justify="end" class="mr-8 pa-1">
-                    <v-btn color="red" @click="deleteComment(comment.id)" icon>
+                    <v-btn :loading="loading" color="red" @click="deleteComment(comment.id)" icon>
                       <v-icon>
                         mdi-delete
                       </v-icon>

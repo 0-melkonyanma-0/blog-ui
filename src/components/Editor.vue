@@ -222,9 +222,8 @@
     <div class="editor__content">
       <editor-content
           style="padding: 20px"
-          v-bind="initialValue"
+          v-model:editor="editor"
           :style="contentEditorStyle ? 'height: 500px;' : 'height: 125px;'"
-          :editor="editor"
       />
     </div>
   </div>
@@ -296,7 +295,8 @@ export default {
       json: '',
       editor: null,
       url: '',
-      showImgDialog: false
+      showImgDialog: false,
+      content: ''
     };
   },
   methods: {
@@ -313,11 +313,16 @@ export default {
       this.url = ''
     },
   },
+  watch: {
+    initialValue: {
+      handler() {
+        this.editor.commands.setContent(this.initialValue, false)
+      }
+    }
+  },
   created() {
-    const content = this.initialValue
-
     this.editor = new Editor({
-      content: content,
+      content: '',
       extensions: [
         StarterKit,
         Underline,

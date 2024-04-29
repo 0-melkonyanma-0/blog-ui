@@ -16,11 +16,14 @@ const props = defineProps({
   }
 })
 
+let editor = ref(null)
+
 let post = ref({
   title: '',
   body: '',
   cover: '',
-  categories: []
+  categories: [],
+  loading: false
 })
 
 let selectCategories = ref([])
@@ -30,44 +33,60 @@ function setPostBody(body) {
 }
 
 function savePost() {
+  post.value.loading = true
   if (!props.model) {
     axios.post(`${API_PATH}/posts`, post.value)
         .then(({data}) => {
+          post.value.loading = false
           router.push({name: 'posts.show', params: {id: data.id}})
           toast.success(this.$t('post.success_created'))
         })
         .catch
         ((err) => {
+          post.value.loading = false
           toast.error(err.response.data.message)
         })
   } else {
     axios.patch(`${API_PATH}/posts/${props.model}`, post.value)
         .then(({data}) => {
+          post.value.loading = false
           router.push({name: 'posts.show', params: {id: data.id}})
           toast.success(this.$t('post.success_created'))
         })
         .catch
         ((err) => {
+          post.value.loading = false
           toast.error(err.response.data.message)
         })
   }
 }
 
 onMounted(async () => {
-  const {data} = await axios.get(`${API_PATH}/categories`)
-  selectCategories.value = data.data
+  post.value.loading = true
+
+  await axios.get(`${API_PATH}/categories`).then(({data}) => {
+    selectCategories.value = data.data
+    post.value.loading = false
+  })
+
+
   if (props.model) {
-    const {data} = await axios.get(`${API_PATH}/posts/${props.model}/edit`)
+    await axios.get(`${API_PATH}/posts/${props.model}/edit`)
+        .then(({data}) => {
+          post.value.loading = false
+          post.value.categories = data.data.categories.map((el) => el.id)
+          post.value.cover = data.data.cover
+          post.value.title = data.data.title
+          post.value.body = data.data.body
+          this.$forceUpdate
+        })
         .catch((err) => {
+          post.value.loading = false
           if (err.response.status === 403) {
             toast.error(err.response.data.message)
             router.push({name: 'posts.index'})
           }
         })
-    post.value.categories = data.data.categories.map((el) => el.id)
-    post.value.cover = data.data.cover
-    post.value.title = data.data.title
-    post.value.body = data.data.body
   }
 });
 </script>
@@ -79,6 +98,10 @@ onMounted(async () => {
         <v-card-title class="mx-4 my-4">
           {{ !model ? $t('post.create') : $t('post.edit') }}
         </v-card-title>
+        <v-row class="my-4" v-if="post.loading && model" justify="center">
+          <v-progress-circular indeterminate>
+          </v-progress-circular>
+        </v-row>
         <v-card-text>
           <v-text-field
               class="mx-4"
@@ -115,6 +138,7 @@ onMounted(async () => {
             </template>
           </v-select>
           <editor
+              ref="editor"
               class="mx-4 mb-4"
               :content-editor-style="true"
               :active-buttons="[
@@ -138,6 +162,7 @@ onMounted(async () => {
         <v-card-actions class="ma-0 pa-0 mx-8 mb-4">
           <v-btn
               variant="outlined"
+              :loading="post.loading"
               color="primary"
               @click="savePost"
           >

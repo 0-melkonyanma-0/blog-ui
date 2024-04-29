@@ -9,18 +9,24 @@ const toast = useToast()
 
 export default {
   data: () => ({
-    user: null
+    user: null,
+    loading: false
   }),
   created() {
     this.user = JSON.parse(Cookies.get('current_user'))
   },
   methods: {
     async updateUser() {
+      this.loading = true
       await axios.patch(`${API_PATH}/users/${this.user.username}`, this.user)
           .then(() => {
+            this.loading = false
             toast.success(this.$t('updated'))
+            this.user.password = ''
+            this.user.password_confirmation = ''
           })
           .catch((err) => {
+            this.loading = false
             toast.error(err.response.data.message)
           })
       await useAuthStore().getCurrentUser()
@@ -74,7 +80,7 @@ export default {
             </v-text-field>
           </v-card-text>
           <v-card-actions class="mx-3">
-            <v-btn :loading="false" type="submit" color="primary" variant="outlined">
+            <v-btn :loading="loading" type="submit" color="primary" variant="outlined">
               {{ $t('update') }}
             </v-btn>
             <v-btn :to="{name: 'users.show', params: {username: user.username}}" variant="outlined">

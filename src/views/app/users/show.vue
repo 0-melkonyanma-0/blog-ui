@@ -1,7 +1,7 @@
 <template>
   <v-container v-if="user.name !== ''" class="mx-auto d-flex align-center justify-center">
     <v-responsive max-width="600">
-      <v-card class="profile__color" max-height="200" style="border: solid 1px gray">
+      <v-card class="profile__color" max-height="250" style="border: solid 1px gray">
         <v-card-text>
           <v-row>
             <v-col cols="3">
@@ -16,11 +16,22 @@
                 <v-col style="color: white" class="pa-0">
                   {{ user.name }}
                 </v-col>
-                <v-col class="pa-0 ml-10" v-if="user.username !== useAuthStore().user.username">
-                  <v-btn color="green" icon @click="subscribe">
-                    <v-icon>
-                      mdi-plus
-                    </v-icon>
+                <v-col class="pa-0 ml-10" v-if="
+                    user.username !== useAuthStore().user.username
+                    && !Array.from(followers.followers).includes(useAuthStore().user.username)
+                "
+                >
+                  <v-btn :loading="sub_load" color="green" @click="subscribe">
+                    {{ $t('user.subscribe') }}
+                  </v-btn>
+                </v-col>
+                <v-col class="pa-0 ml-10" v-if="
+                    user.username !== useAuthStore().user.username &&
+                    Array.from(followers.followers).includes(useAuthStore().user.username)
+                  "
+                >
+                  <v-btn :loading="sub_load" color="red" @click="unSubscribe">
+                    {{ $t('user.un-subscribe') }}
                   </v-btn>
                 </v-col>
               </v-row>
@@ -31,6 +42,9 @@
                 <span class="mr-1 mt-2" style="color: white">Email:</span>
                 <v-chip color="#B3B15B">{{ user.email }}</v-chip>
               </v-row>
+              <v-row justify="start" class="my-6">
+                <span style="color: white">{{ $t('user.amount_of_follower', {subs: followers.count}) }}</span>
+              </v-row>
             </v-col>
           </v-row>
         </v-card-text>
@@ -39,16 +53,18 @@
   </v-container>
   <v-row class="my-4" justify="center">
     <div class="tabs__color">
-      <v-tabs hide-slider selected-class="tabs-selected__color">
+      <v-tabs v-model="tab" hide-slider selected-class="tabs-selected__color">
         <v-tab :disabled="loading" @click="getUserPosts(1)">
           {{ $t('post.all_posts') }}
         </v-tab>
-        <v-tab :disabled="loading" @click="getArchivedUserPosts(1)" v-if="useAuthStore().user.username === $route.params.username">
+        <v-tab :disabled="loading" @click="getArchivedUserPosts(1)"
+               v-if="useAuthStore().user.username === $route.params.username">
           {{ $t('post.archived_posts') }}
         </v-tab>
       </v-tabs>
     </div>
-    <v-btn class="ml-4" color="green" @click="$router.push({name: 'posts.create' })">
+    <v-btn v-if="useAuthStore().user.username === $route.params.username" class="ml-4" color="green"
+           @click="$router.push({name: 'posts.create' })">
       <v-icon>
         mdi-plus
       </v-icon>
@@ -58,7 +74,22 @@
     <v-window-item>
       <v-container class="mx-auto d-flex align-center justify-center">
         <v-card variant="flat" class="posts-background__color">
-          <v-responsive max-width="1500">
+          <v-responsive min-width="900" max-width="1500">
+            <v-card-title>
+              <v-row justify="center">
+                <v-text-field
+                    v-model="search"
+                    prepend-inner-icon="mdi-magnify"
+                    variant="outlined"
+                    density="compact"
+                    class="mt-10 mx-10"
+                    bg-color="white"
+                    clearable
+                    @keyup.enter="tab === 0 ? getUserPosts(current_page) : getArchivedUserPosts(current_page)"
+                >
+                </v-text-field>
+              </v-row>
+            </v-card-title>
             <v-card-text>
               <v-row
                   v-if="posts.length > 0"
@@ -67,17 +98,17 @@
                   justify="center"
               >
                 <v-col
-                    xs="12"
-                    lg="4"
-                    md="4"
-                    xl="4"
-                    xxl="4"
+                    :xs="12"
+                    :lg="postRow.length === 2 ? 6 : 3"
+                    :md="postRow.length === 2 ? 4 : 3"
+                    :xl="postRow.length === 2 ? 3 : 3"
+                    :xxl="postRow.length === 2 ? 4 : 3"
                     v-for="(post, index) in postRow"
                     :key="`post-row-id-${index / Math.random()}`"
                 >
                   <v-card
+                      min-width="150"
                       style="border: solid 2px #B39CD0; border-radius: 8px"
-                      @click="$router.push({name: 'posts.show', params: {id: post.id}})"
                       :disabled="loading"
                   >
                     <v-skeleton-loader
@@ -136,6 +167,7 @@ import {API_PATH} from "../../../plugins/consts.js";
 import PostBody from "../../../components/PostBody.vue";
 import {chunk} from "lodash/array.js";
 import {useAuthStore} from "../../../stores/AuthStore.js";
+import {useAuthorsStore} from "../../../stores/AuthorStore.js";
 
 export default {
   data: () => ({
@@ -148,9 +180,14 @@ export default {
     total: null,
     loading: true,
     current_page: 1,
+    followers: 0,
+    sub_load: false,
+    tab: 0,
+    search: ''
   }),
   components: {PostBody},
   methods: {
+    useAuthorsStore,
     useAuthStore,
     async getUser() {
       this.loading = true
@@ -160,7 +197,7 @@ export default {
     },
     async getUserPosts(page) {
       this.loading = true
-      const {data} = await axios.get(`${API_PATH}/users/${this.$route.params.username}/posts?page=${page}&amount=21`)
+      const {data} = await axios.get(`${API_PATH}/users/${this.$route.params.username}/posts?page=${page}&amount=21&search=${this.search}`)
       this.loading = false
       this.posts = chunk(data.data, 3)
       this.current_page = data.current_page
@@ -168,19 +205,43 @@ export default {
     },
     async getArchivedUserPosts(page) {
       this.loading = true
-      const {data} = await axios.get(`${API_PATH}/archived/posts?page=${page}&amount=21`)
+      const {data} = await axios.get(`${API_PATH}/archived/posts?page=${page}&amount=21&search=${this.search}`)
       this.loading = false
       this.posts = chunk(data.data, 3)
       this.current_page = data.current_page
       this.total = data.last_page
     },
     async subscribe() {
-      await axios.post(`${API_PATH}/users/${this.$route.params.username}/follow `)
-    }
+      this.sub_load = true
+      await axios.post(`${API_PATH}/users/${this.$route.params.username}/follow`)
+          .then(() => {
+            this.sub_load = false
+          }).catch(() => {
+            this.sub_load = false
+          })
+      await this.getFollowers()
+    },
+    async unSubscribe() {
+      this.sub_load = true
+      await axios.post(`${API_PATH}/users/${this.$route.params.username}/un-follow`)
+          .then(() => {
+            this.sub_load = false
+          }).catch(() => {
+            this.sub_load = false
+          })
+      await this.getFollowers()
+    },
+    async getFollowers() {
+      await axios.get(`${API_PATH}/users/${this.$route.params.username}/followers`)
+          .then(({data}) => {
+            this.followers = data.data
+          })
+    },
   },
   created() {
     this.getUser()
     this.getUserPosts(1)
+    this.getFollowers()
   }
 }
 </script>

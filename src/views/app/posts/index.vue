@@ -1,20 +1,36 @@
 <template>
   <v-container class="mx-auto d-flex align-center justify-center">
     <v-card variant="flat" class="posts-background__color">
-      <v-responsive max-width="1500">
+      <v-card-title>
+        <v-row justify="center">
+          <v-text-field
+              v-model="search"
+              prepend-inner-icon="mdi-magnify"
+              variant="outlined"
+              density="compact"
+              class="mt-10 mx-10"
+              bg-color="white"
+              clearable
+              @keyup.enter="getAllPosts(current_page)"
+          >
+          </v-text-field>
+        </v-row>
+      </v-card-title>
+      <v-responsive min-width="900" max-width="1500">
         <v-card-text>
           <v-row v-if="posts.length" v-for="(postRow, index) in posts" :key="`post-row-${index}`" justify="center">
             <v-col
-                xs="12"
-                lg="4"
-                md="4"
-                xl="4"
-                xxl="4"
+                :xs="12"
+                :lg="postRow.length === 2 ? 6 : 3"
+                :md="postRow.length === 2 ? 4 : 3"
+                :xl="postRow.length === 2 ? 3 : 3"
+                :xxl="postRow.length === 2 ? 4 : 3"
                 v-for="(post, index) in postRow"
                 :key="`post-row-id-${index / Math.random()}`"
             >
               <v-card
-                  style="border: solid 2px gray; border-radius: 8px"
+                  min-width="150"
+                  style="border: solid 2px #B39CD0; border-radius: 8px"
                   :disabled="loading"
               >
                 <v-skeleton-loader
@@ -78,11 +94,12 @@ export default {
     total: null,
     loading: true,
     current_page: 1,
+    search: ''
   }),
   methods: {
     async getAllPosts(page) {
       this.loading = true
-      const {data} = await axios.get(`${API_PATH}/posts?page=${page}&amount=21`)
+      const {data} = await axios.get(`${API_PATH}/posts?page=${page}&amount=21&search=${this.search}`)
       this.loading = false
       this.posts = chunk(data.data, 3)
       this.current_page = data.current_page
@@ -97,9 +114,9 @@ export default {
 
 <style>
 .posts-background__color {
-  background: rgba( 206, 214, 237, 0.6 );
-  backdrop-filter: blur( 14.5px );
-  -webkit-backdrop-filter: blur( 14.5px );
+  background: rgba(206, 214, 237, 0.6);
+  backdrop-filter: blur(14.5px);
+  -webkit-backdrop-filter: blur(14.5px);
   border-radius: 10px;
 }
 </style>

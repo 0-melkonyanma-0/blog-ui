@@ -17,15 +17,23 @@ const props = defineProps(['post', 'show'])
         {{ props.post.author.username }}
       </v-chip>
     </v-row>
+    <v-row class="mx-2 mb-4">
+      <v-chip v-for="(category, index) in props.post.categories"
+              :style="{backgroundColor: `#${((Math.random() * 0xffffff) <<0).toString(16)}`, color: 'white'}"
+      >
+        {{ category.title }}
+      </v-chip>
+    </v-row>
   </v-card-title>
   <v-card-text class="mx-2">
-    <span :class="props.show? '': 'body-ellipses'">
-      {{ props.post.body }}
+    <span v-if="show" v-html="props.post.body" :class="props.show? '': 'body-ellipses'">
+    </span>
+    <span v-else v-html="props.post.body.replace(/(<img([^>]+)>)/ig, '')" :class="props.show ? '': 'body-ellipses'">
     </span>
   </v-card-text>
   <v-card-text v-if="!show">
     <v-row justify="end" class="pa-2">
-      <v-col class="pa-0 ml-2" cols="9">
+      <v-col class="pa-0 ml-2" cols="6">
         <v-btn
             color="primary"
             @click="$router.push({name: 'posts.show', params: {id: post.id}})"
